@@ -2,27 +2,42 @@ version: 0.2
 
 env:
   variables:
-    REPO_URL: "908027390909.dkr.ecr.us-east-1.amazonaws.com/team-pravin-ecr"  # Replace with your ECR URL
+    REPO_URL: !Sub "${REPO_URL}"
+    IMAGE_TAG: !Sub "${IMAGE_TAG}"
 
 phases:
+  install:
+    runtime-versions:
+      docker: 18
+    commands:
+      # Installing AWS CLI to interact with ECR
+      - echo Installing AWS CLI...
+      - apt-get update -y
+      - apt-get install -y awscli
+
   pre_build:
     commands:
-      - echo "Logging in to Amazon ECR..."
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "$REPO_URL"
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)  # Get the first 7 characters of the commit hash
-      - IMAGE_TAG="latest"  # Tag to use for the image (can be customized if needed)
-      - echo "Using tag: $IMAGE_TAG"
+      # Logging into AWS ECR to push the Docker image
+      - echo Logging in to Amazon ECR...
+      - aws --region us-east-1 ecr get-login-password --no-include-email | docker login --username AWS --password-stdin $REPO_URL
+      - echo Build started on `date`
 
   build:
     commands:
-      - echo "Building the Docker image..."
-      - docker build -t "$REPO_URL:$IMAGE_TAG" .  # Build the Docker image with the tag as the ECR URL and image tag
+      # Building the Docker image and tagging it
+      - echo Building the Docker image...
+      - docker build -t $REPO_URL:$IMAGE_TAG .
+      - docker tag $REPO_URL:$IMAGE_TAG $REPO_URL:$IMAGE_TAG
 
   post_build:
     commands:
-      - echo "Pushing the Docker image..."
-      - docker push "$REPO_URL:$IMAGE_TAG"  # Push the built Docker image to ECR
+      # Pushing the Docker image to ECR
+      - echo Pushing the Docker image to Amazon ECR...
+      - docker push $REPO_URL:$IMAGE_TAG
+      - echo Build and push completed on `date`
 
 artifacts:
   files:
-    - '**/*'  # Ensure the right artifacts are being collected (e.g., logs or build outputs)
+    - imagedefinitions.json
+
+# The imagedefinitions.json file will be used in the ECS deployment step.
