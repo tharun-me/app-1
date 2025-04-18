@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    REPO_URL: "908027390909.dkr.ecr.us-east-1.amazonaws.com/team-pravin-ecr"  # Ensure this is your ECR repo URL
+    REPO_URL: "908027390909.dkr.ecr.us-east-1.amazonaws.com/team-pravin-ecr"  # Replace with your ECR URL
 
 phases:
   pre_build:
@@ -10,7 +10,7 @@ phases:
       - echo "Logging in to Amazon ECR..."
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "$REPO_URL"
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)  # Get the first 7 characters of the commit hash
-      - IMAGE_TAG="latest"  # Use "latest" or you could also use the commit hash (e.g., $COMMIT_HASH) if you prefer
+      - IMAGE_TAG="latest"  # Tag to use for the image (can be customized if needed)
       - echo "Using tag: $IMAGE_TAG"
 
   build:
@@ -25,4 +25,4 @@ phases:
 
 artifacts:
   files:
-    - '**/*'
+    - '**/*'  # Ensure the right artifacts are being collected (e.g., logs or build outputs)
