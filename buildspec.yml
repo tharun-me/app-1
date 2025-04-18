@@ -1,24 +1,28 @@
 version: 0.2
 
+env:
+  variables:
+    REPO_URL: "908027390909.dkr.ecr.us-east-1.amazonaws.com/team-pravin-ecr"  # Ensure this is your ECR repo URL
+
 phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws --version
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "$REPO_URL"
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - IMAGE_TAG=latest
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)  # Get the first 7 characters of the commit hash
+      - IMAGE_TAG="latest"  # Use "latest" or you could also use the commit hash (e.g., $COMMIT_HASH) if you prefer
+      - echo "Using tag: $IMAGE_TAG"
+
   build:
     commands:
-      - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -t "$REPO_URL:$IMAGE_TAG" .
+      - docker build -t "$REPO_URL:$IMAGE_TAG" .  # Build the Docker image with the tag as the ECR URL and image tag
+
   post_build:
     commands:
-      - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - docker push "$REPO_URL:$IMAGE_TAG"
+      - docker push "$REPO_URL:$IMAGE_TAG"  # Push the built Docker image to ECR
 
-env:
-  variables:
-    REPO_URL: 908027390909.dkr.ecr.us-east-1.amazonaws.com/team-pravin-ecr
+artifacts:
+  files:
+    - '**/*'
