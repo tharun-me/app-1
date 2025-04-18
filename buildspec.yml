@@ -7,7 +7,7 @@ env:
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
+      - echo "Logging in to Amazon ECR..."
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "$REPO_URL"
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)  # Get the first 7 characters of the commit hash
       - IMAGE_TAG="latest"  # Use "latest" or you could also use the commit hash (e.g., $COMMIT_HASH) if you prefer
@@ -15,12 +15,12 @@ phases:
 
   build:
     commands:
-      - echo Building the Docker image...
+      - echo "Building the Docker image..."
       - docker build -t "$REPO_URL:$IMAGE_TAG" .  # Build the Docker image with the tag as the ECR URL and image tag
 
   post_build:
     commands:
-      - echo Pushing the Docker image...
+      - echo "Pushing the Docker image..."
       - docker push "$REPO_URL:$IMAGE_TAG"  # Push the built Docker image to ECR
 
 artifacts:
