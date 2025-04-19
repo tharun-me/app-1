@@ -4,6 +4,7 @@ phases:
   install:
     commands:
       - echo "Hello World"
+      - echo '[{"name":"my-container","imageUri":"example-repo-url:latest"}]' > imagedefinitions.json
 
 artifacts:
   files:
