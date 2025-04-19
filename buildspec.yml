@@ -10,34 +10,30 @@ phases:
     runtime-versions:
       docker: 18
     commands:
-      # Installing AWS CLI to interact with ECR
       - echo Installing AWS CLI...
       - apt-get update -y
       - apt-get install -y awscli
 
   pre_build:
     commands:
-      # Logging into AWS ECR to push the Docker image
       - echo Logging in to Amazon ECR...
       - aws --region us-east-1 ecr get-login-password --no-include-email | docker login --username AWS --password-stdin $REPO_URL
       - echo Build started on `date`
 
   build:
     commands:
-      # Building the Docker image and tagging it
       - echo Building the Docker image...
       - docker build -t $REPO_URL:$IMAGE_TAG .
       - docker tag $REPO_URL:$IMAGE_TAG $REPO_URL:$IMAGE_TAG
 
   post_build:
     commands:
-      # Pushing the Docker image to ECR
       - echo Pushing the Docker image to Amazon ECR...
       - docker push $REPO_URL:$IMAGE_TAG
+      - echo Writing imagedefinitions.json file...
+      - printf '[{"name":"my-ecs-cluster-container","imageUri":"%s"}]' $REPO_URL:$IMAGE_TAG > imagedefinitions.json
       - echo Build and push completed on `date`
 
 artifacts:
   files:
     - imagedefinitions.json
-
-# The imagedefinitions.json file will be used in the ECS deployment step.
