@@ -17,6 +17,14 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${REPO_URL}
 
+    build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -t ${REPO_URL}:${IMAGE_TAG} .
+      - docker tag $REPO_URL:$IMAGE_TAG $REPO_URL:$IMAGE_TAG
+      - echo Docker image built successfully
+
+
 
 #   pre_build:
 #     commands:
