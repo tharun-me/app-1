@@ -2,9 +2,9 @@ version: 0.2
 
 env:
   variables:
-    REPO_URL: "${REPO_URL}"
-    IMAGE_TAG: "${IMAGE_TAG}"
-
+    REPO_URL: !Sub "${REPO_URL}"
+    IMAGE_TAG: !Sub "${IMAGE_TAG}"
+    
 phases:
   install:
     commands:
@@ -16,7 +16,7 @@ phases:
     commands:
       - echo "REPO_URL: $REPO_URL"
       - echo Logging in to Amazon ECR...
-       - aws --region us-east-1 ecr get-login-password --no-include-email | docker login --username AWS --password-stdin ${REPO_URL}
+       - aws --region us-east-1 ecr get-login-password | docker login --username AWS --password-stdin $REPO_URL
       - echo Build started on `date`
 
   build:
